@@ -11,11 +11,6 @@ import org.jetbrains.annotations.NotNull;
  */
 
 public interface Solid<V,T> {
-
-    @NotNull IndexedSeq<V> getVertices();
-    @NotNull IndexedSeq<Integer> getIndices();
-    @NotNull Seq<T> getParts();
-
     class Part<TopologyType> {
 
         private final @NotNull TopologyType topology;
@@ -40,6 +35,10 @@ public interface Solid<V,T> {
         public int getIndexStart(){
             return indexStart;
         }
+
     }
 
+    @NotNull IndexedSeq<V> getVertices();
+    @NotNull IndexedSeq<Integer> getIndices();
+    @NotNull Seq<Part<T>> getParts();
 }
