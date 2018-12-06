@@ -24,32 +24,21 @@ public class WireframeRenderer<P> implements SolidRenderer<P, Point3D, Topology>
             @NotNull Image<P> image,
             @NotNull IndexedSeq<Point3D> vertices,
             @NotNull IndexedSeq<Integer> indices,
-            int IndexStart, int PrimitivesCount,
+            int indexStart, int primitivesCount,
             @NotNull Topology topology,
             @NotNull Mat4 matTransform, @NotNull P value) {
         switch (topology) {
             case TRIANGLES:
-                return Stream.rangeClosed(0, PrimitivesCount - 1)
+                return Stream.rangeClosed(0, primitivesCount - 1)
                              .foldLeft(image,
                                      (currentImage, i) -> {
                                          renderEdge(
                                                  currentImage,
                                                  vertices.get(indices.get(
-                                                         IndexStart + 3 * i
+                                                         indexStart + 3 * i
                                                  )),
                                                  vertices.get(indices.get(
-                                                         IndexStart + 3 * i + 1
-                                                 )),
-                                                 matTransform,
-                                                 value
-                                         );
-                                         renderEdge(
-                                                 currentImage,
-                                                 vertices.get(indices.get(
-                                                         IndexStart + 3 * i + 1
-                                                 )),
-                                                 vertices.get(indices.get(
-                                                         IndexStart + 3 * i + 2
+                                                         indexStart + 3 * i + 1
                                                  )),
                                                  matTransform,
                                                  value
@@ -57,10 +46,21 @@ public class WireframeRenderer<P> implements SolidRenderer<P, Point3D, Topology>
                                          renderEdge(
                                                  currentImage,
                                                  vertices.get(indices.get(
-                                                         IndexStart + 3 * i
+                                                         indexStart + 3 * i + 1
                                                  )),
                                                  vertices.get(indices.get(
-                                                         IndexStart + 3 * i + 2
+                                                         indexStart + 3 * i + 2
+                                                 )),
+                                                 matTransform,
+                                                 value
+                                         );
+                                         renderEdge(
+                                                 currentImage,
+                                                 vertices.get(indices.get(
+                                                         indexStart + 3 * i
+                                                 )),
+                                                 vertices.get(indices.get(
+                                                         indexStart + 3 * i + 2
                                                  )),
                                                  matTransform,
                                                  value
@@ -70,16 +70,16 @@ public class WireframeRenderer<P> implements SolidRenderer<P, Point3D, Topology>
                              );
 
             case LINES:
-                return Stream.rangeClosed(0, PrimitivesCount - 1)
+                return Stream.rangeClosed(0, primitivesCount - 1)
                              .foldLeft(image,
                                      (currentImage, i) ->
                                              renderEdge(
                                                      currentImage,
                                                      vertices.get(indices.get(
-                                                             IndexStart + 2 * i
+                                                             indexStart + 2 * i
                                                      )),
                                                      vertices.get(indices.get(
-                                                             IndexStart + 2 * i + 1
+                                                             indexStart + 2 * i + 1
                                                      )),
                                                      matTransform,
                                                      value
