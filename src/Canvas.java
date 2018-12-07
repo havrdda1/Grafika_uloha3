@@ -26,10 +26,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 /**
- * trida pro kresleni na platno: zobrazeni pixelu
+ * class for rasterizing of canvas
  *
- * @author PGRF FIM UHK
- * @version 2017
+ * @author Havrda Daniel
+ * @version 2018
+ * author of transforms library: Jan Vanek
  */
 
 public class Canvas {
@@ -62,28 +63,21 @@ public class Canvas {
 
         solidBuffer = new ArrayList<>();
         colorBuffer = new ArrayList<>();
-//*
+
         image = new ImageAWT<>(
                 img,
-                //Function<PixelType,Integer>, kde PixelType = Color
+
                 (Color c) -> c.getRGB(),
-                //Function<Integer,PixelType>, kde PixelType = Color
+
                 (Integer i) -> new Color(i)
         );
         presenter = new PresenterAWT<>();
-/*/
-		rasterImage = RasterImageImmu.cleared(
-				width, height, new Color(255,0,0));
-		presenter = new ImagePresenterUniversal<>(color -> color.getRGB());
-//*/
         lineRenderer = new LineRendererDDA<>();
 
         camera = new Camera()
                 .withPosition(new Vec3D(3,3,2))
                 .withAzimuth(Math.PI*1.25)
                 .withZenith(-Math.atan(1.0 / 5.0));
-
-        //Nastavení zásobníku objektu a barev
 
         solidBuffer.add(new AxisX());
         solidBuffer.add(new AxisY());
