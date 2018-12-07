@@ -17,7 +17,7 @@ public interface Solid<V,T> {
         private final int primitivesCount;
         private final int indexStart;
 
-        public Part(@NotNull TopologyType topology, int primitivesCount, int indexStart) {
+        public Part(int indexStart,int primitivesCount,@NotNull TopologyType topology) {
             this.topology = topology;
             this.primitivesCount = primitivesCount;
             this.indexStart = indexStart;

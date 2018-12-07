@@ -7,6 +7,7 @@ import solidsdata.Topology;
 import solidsdata.Solid;
 import transforms.Mat4;
 
+
 public interface SolidRenderer<P, V, T> {
     default @NotNull Image<P> render(
             @NotNull Image<P> image,
@@ -15,18 +16,19 @@ public interface SolidRenderer<P, V, T> {
             @NotNull P value
     ) {
         return solid.getParts()
-                    .foldLeft(image,
-                            (currentImage, part) -> render(
-                                    currentImage,
-                                    solid.getVertices(),
-                                    solid.getIndices(),
-                                    part.getIndexStart(),
-                                    part.getPrimitivesCount(),
-                                    part.getTopology(),
-                                    matTransform,
-                                    value
-                            )
-                    );
+                    .
+                            foldLeft(image,
+                                    (currentImage, part) -> render(
+                                            currentImage,
+                                            solid.getVertices(),
+                                            solid.getIndices(),
+                                            part.getIndexStart(),
+                                            part.getPrimitivesCount(),
+                                            part.getTopology(),
+                                            matTransform,
+                                            value
+                                    )
+                            );
     }
 
     @NotNull Image<P> render(
