@@ -15,9 +15,10 @@ public class ImageAWT<PixelType> implements Image<PixelType> {
     public ImageAWT(final @NotNull BufferedImage img,
                     final @NotNull Function<PixelType, Integer> pixelType2Integer,
                     final @NotNull Function<Integer, PixelType> integer2PixelType) {
-        this.img  = img;
+        this.img = img;
         this.pixelType2Integer = pixelType2Integer;
-        this.integer2PixelType = integer2PixelType;}
+        this.integer2PixelType = integer2PixelType;
+    }
 
     @Override
     public @NotNull Optional<PixelType> getValue(int c, int r) {
@@ -45,13 +46,16 @@ public class ImageAWT<PixelType> implements Image<PixelType> {
 
     @Override
     public int getWidth() {
-        return img.getWidth();    }
+        return img.getWidth();
+    }
 
     @Override
     public int getHeight() {
         return img.getHeight();
     }
 
-    @NotNull BufferedImage getImg() { return img; }
+    @NotNull BufferedImage getImg() {
+        return img;
+    }
 }
 

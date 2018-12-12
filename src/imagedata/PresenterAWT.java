@@ -12,7 +12,7 @@ public class PresenterAWT<PixelType> implements Presenter<PixelType, Graphics> {
 
     public Graphics present(@NotNull Image<PixelType> image,
                             @NotNull Graphics device) {
-        if (image instanceof ImageAWT){
+        if (image instanceof ImageAWT) {
             BufferedImage img = ((ImageAWT) image).getImg();
             device.drawImage(img, 0, 0, null);
         } else {

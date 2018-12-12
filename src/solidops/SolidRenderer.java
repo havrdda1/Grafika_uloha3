@@ -3,7 +3,6 @@ package solidops;
 import imagedata.Image;
 import io.vavr.collection.IndexedSeq;
 import org.jetbrains.annotations.NotNull;
-import solidsdata.Topology;
 import solidsdata.Solid;
 import transforms.Mat4;
 
