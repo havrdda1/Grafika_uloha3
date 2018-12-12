@@ -79,7 +79,7 @@ public class Canvas {
                 image.getHeight() / (double) image.getWidth(),
                 0.1, 1000
         );
-        matOrtho = new Mat4OrthoRH(image.getWidth() / 100, image.getHeight() / 100, 0.1, 1000);
+        matOrtho = new Mat4OrthoRH(image.getWidth() / 100.0, image.getHeight() / 100.0, 0.1, 1000);
         matView = matPersp;
         matMultiply = matPersp;
         presenter = new PresenterAWT<>();
@@ -95,7 +95,7 @@ public class Canvas {
         solidBuffer.add(new AxisZ());
         solidBuffer.add(new CustomSolid());
         solidBuffer.add(new Tetrahedron());
-        solidBuffer.add(new PolygonMesh(20));
+        solidBuffer.add(new PolygonMesh(50));
 
         colorBuffer.add(Color.RED);
         colorBuffer.add(Color.GREEN);
@@ -135,11 +135,11 @@ public class Canvas {
 
                     case KeyEvent.VK_P:
                         if (isPersp) {
-                            matMultiply = matPersp;
-                            matView = matPersp;
-                        } else {
                             matMultiply = matOrtho;
                             matView = matOrtho;
+                        } else {
+                            matMultiply = matPersp;
+                            matView = matPersp;
                         }
                         isPersp = !isPersp;
                         break;
@@ -259,13 +259,10 @@ public class Canvas {
 
     }
 
-    private void help() {
-
-    }
 
     private void draw() {
         clear();
-
+        //axis
         for (int i = 0; i < 3; i++) {
             image =
                     new WireframeRenderer<>(lineRenderer)
@@ -275,7 +272,7 @@ public class Canvas {
                                     colorBuffer.get(i));
         }
 
-
+        //solids
         for (int i = 3; i < solidBuffer.size(); i++) {
             image =
                     new WireframeRenderer<>(lineRenderer)
