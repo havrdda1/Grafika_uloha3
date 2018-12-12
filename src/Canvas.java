@@ -35,31 +35,30 @@ import javax.swing.WindowConstants;
 
 public class Canvas {
 
-    private final JFrame frame;
     private final JPanel panel;
-    private final BufferedImage img;
 
     private Camera camera;
 
     private final ArrayList<Solid> solidBuffer;
     private final ArrayList<Color> colorBuffer;
-    private ArrayList<Point3D> meshBuffer;
-
+    private Mat4Identity matView;
+    private final Mat4Identity matPersp;
+    private final Mat4Identity matOrtho;
     private Image image;
     private final @NotNull Presenter<Color, Graphics> presenter;
-
+    private boolean isPersp;
     private final @NotNull LineRenderer<Color> lineRenderer;
     private int startC, startR;
+    private Canvas(final int width, final int height) {
+        JFrame frame = new JFrame();
 
-    public Canvas(final int width, final int height) {
-        frame = new JFrame();
-
+        isPersp = true;
         frame.setLayout(new BorderLayout());
-        frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
+        frame.setTitle("UHK FIM PGRF 1 " + this.getClass().getName());
         frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
         solidBuffer = new ArrayList<>();
         colorBuffer = new ArrayList<>();
@@ -67,10 +66,17 @@ public class Canvas {
         image = new ImageAWT<>(
                 img,
 
-                (Color c) -> c.getRGB(),
+                Color::getRGB,
 
-                (Integer i) -> new Color(i)
+                Color::new
         );
+        matPersp = new Mat4PerspRH(
+                Math.PI / 2.5,
+                image.getHeight() / (double) image.getWidth(),
+                0.1, 1000
+        );
+        matOrtho = new Mat4OrthoRH(image.getWidth()/100,image.getHeight()/100,0.1,1000);
+        matView = matPersp;
         presenter = new PresenterAWT<>();
         lineRenderer = new LineRendererDDA<>();
 
@@ -83,25 +89,15 @@ public class Canvas {
         solidBuffer.add(new AxisY());
         solidBuffer.add(new AxisZ());
         solidBuffer.add(new CustomSolid());
-        solidBuffer.add(new PolygonMesh(10));
+        solidBuffer.add(new Tetrahedron());
+        solidBuffer.add(new PolygonMesh(20));
 
-        colorBuffer.add(new Color(1.0f, 0, 0));
-        colorBuffer.add(new Color(0, 1.0f, 0));
-        colorBuffer.add(new Color(0, 0, 1.0f));
-        colorBuffer.add(new Color(1.0f, 0, 1));
-        colorBuffer.add(new Color(1.0f, 1, 0));
-
-        meshBuffer = new ArrayList<>(16);
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                int z = 1;
-                if (i > 0 && i < 3 && j > 1 && j < 3)
-                    z = 2;
-                meshBuffer.add(new Point3D(i, j, z));
-                if (16 < meshBuffer.size())
-                    System.out.println("Mesh má více bodů než 16");
-            }
-        }
+        colorBuffer.add(Color.RED);
+        colorBuffer.add(Color.GREEN);
+        colorBuffer.add(Color.BLUE);
+        colorBuffer.add(Color.YELLOW);
+        colorBuffer.add(Color.MAGENTA);
+        colorBuffer.add(Color.CYAN);
 
         panel = new JPanel() {
             private static final long serialVersionUID = 1L;
@@ -117,24 +113,27 @@ public class Canvas {
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_W:
-                        camera = camera.forward(0.1);
-                        System.out.println("Dopředu");
+                        camera = camera.forward(0.2);
                         break;
 
                     case KeyEvent.VK_S:
-                        camera = camera.backward(0.1);
-                        System.out.println("Dozadu");
+                        camera = camera.backward(0.2);
                         break;
 
                     case KeyEvent.VK_A:
-                        camera = camera.left(0.1);
-                        System.out.println("Doleva");
+                        camera = camera.left(0.2);
                         break;
 
                     case KeyEvent.VK_D:
-                        camera = camera.right(0.1);
-                        System.out.println("Doprava");
+                        camera = camera.right(0.2);
                         break;
+
+                    case KeyEvent.VK_P:
+                       if (isPersp)
+                        matView = matPersp;
+                       else
+                        matView = matOrtho;
+                      isPersp = !isPersp;
 
                 }
                 draw();
@@ -164,7 +163,7 @@ public class Canvas {
                 final double y2 =
                         -(2 * (endR + 0.5) / image.getHeight() - 1);
 
-                camera = moveCam(camera, new Vec2D(x2-x1, y2-y1));
+                camera = rotateCam(camera, new Vec2D(x2-x1, y2-y1));
                 draw();
                 panel.repaint();
 
@@ -178,10 +177,9 @@ public class Canvas {
         frame.setVisible(true);
     }
 
-    private Camera moveCam(Camera cam, Vec2D vec) {
+    private Camera rotateCam(Camera cam, Vec2D vec) {
 
         double x = cam.getAzimuth() * (1 - vec.getX() * 0.5);
-        //float y = (float)(camera.getZenith() * (1 - vec.getY() * 5));
         double y = cam.getZenith() + vec.getY();
 
         cam = cam.withAzimuth(x);
@@ -189,41 +187,39 @@ public class Canvas {
         return cam;
     }
 
-    public void clear() {
+    private void clear() {
         image = image.cleared(new Color(0x2f, 0x2f, 0x2f));
     }
 
-    public void present(final Graphics graphics) {
+    private void present(final Graphics graphics) {
         presenter.present(image, graphics);
 
         graphics.setColor(Color.WHITE);
-        graphics.drawString("A,W,S,D -> pohyb", 10, 30);
-        graphics.drawString("Mouse_BTN1 -> otáčení kamerou ", 10, 45);
+        graphics.drawString("Pohyb pomoci A,W,S,D", 5, 30);
+        graphics.drawString("Rotace kamery levym tlacitkem mysi ", 5, 45);
+        graphics.drawString("Zmena perspektivy P", 5, 60);
     }
-    public void help() {
+    private void help() {
 
     }
 
-    public void draw() {
+    private void draw() {
         clear();
 
 
         for (int i = 0; i < solidBuffer.size(); i++) {
             image =
-                    new WireframeRenderer<Color>(lineRenderer)
+                    new WireframeRenderer<>(lineRenderer)
                             .render(image, solidBuffer.get(i),
-                                    camera.getViewMatrix()
-                                          .mul(new Mat4PerspRH(
-                                                  Math.PI / 2.5,
-                                                  image.getHeight() / (double) image.getWidth(),
-                                                  0.1, 1000
-                                          )),
+                                   camera.getViewMatrix()
+//                                        .mul(new Mat4OrthoRH(image.getWidth()/100,image.getHeight()/100,0.1,1000)),
+                                          .mul(matView),
                                     colorBuffer.get(i));
             help();
         }
     }
 
-    public void start() {
+    private void start() {
         draw();
         panel.repaint();
     }
