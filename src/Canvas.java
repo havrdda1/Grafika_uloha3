@@ -36,25 +36,29 @@ import javax.swing.WindowConstants;
 public class Canvas {
 
     private final JPanel panel;
-
-    private Camera camera;
-
     private final ArrayList<Solid> solidBuffer;
     private final ArrayList<Color> colorBuffer;
-    private Mat4Identity matView;
     private final Mat4Identity matPersp;
     private final Mat4Identity matOrtho;
-    private Image image;
     private final @NotNull Presenter<Color, Graphics> presenter;
-    private boolean isPersp;
     private final @NotNull LineRenderer<Color> lineRenderer;
+    private final double STEP_ROTATION = 0.1;
+    private final double STEP_MOVE = 0.1;
+    private Camera camera;
+    private Mat4 matMultiply;
+    private Mat4 matView;
+    private Image image;
+    private boolean isPersp;
     private int startC, startR;
+
     private Canvas(final int width, final int height) {
+
         JFrame frame = new JFrame();
 
         isPersp = true;
         frame.setLayout(new BorderLayout());
-        frame.setTitle("UHK FIM PGRF 1 " + this.getClass().getName());
+        frame.setTitle("UHK FIM PGRF 1 " + this.getClass()
+                                               .getName());
         frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -75,14 +79,15 @@ public class Canvas {
                 image.getHeight() / (double) image.getWidth(),
                 0.1, 1000
         );
-        matOrtho = new Mat4OrthoRH(image.getWidth()/100,image.getHeight()/100,0.1,1000);
+        matOrtho = new Mat4OrthoRH(image.getWidth() / 100, image.getHeight() / 100, 0.1, 1000);
         matView = matPersp;
+        matMultiply = matPersp;
         presenter = new PresenterAWT<>();
         lineRenderer = new LineRendererDDA<>();
 
         camera = new Camera()
-                .withPosition(new Vec3D(3,3,2))
-                .withAzimuth(Math.PI*1.25)
+                .withPosition(new Vec3D(3, 3, 2))
+                .withAzimuth(Math.PI * 1.25)
                 .withZenith(-Math.atan(1.0 / 5.0));
 
         solidBuffer.add(new AxisX());
@@ -129,12 +134,59 @@ public class Canvas {
                         break;
 
                     case KeyEvent.VK_P:
-                       if (isPersp)
-                        matView = matPersp;
-                       else
-                        matView = matOrtho;
-                      isPersp = !isPersp;
+                        if (isPersp) {
+                            matMultiply = matPersp;
+                            matView = matPersp;
+                        } else {
+                            matMultiply = matOrtho;
+                            matView = matOrtho;
+                        }
+                        isPersp = !isPersp;
+                        break;
 
+                    case KeyEvent.VK_N:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Scale(0.75, 0.75, 0.75)));
+                        break;
+                    case KeyEvent.VK_M:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Scale(1.25, 1.25, 1.25)));
+                        break;
+
+                    case KeyEvent.VK_LEFT:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Transl(-STEP_MOVE, 0, 0)));
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Transl(STEP_MOVE, 0, 0)));
+                        break;
+                    case KeyEvent.VK_UP:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Transl(0, STEP_MOVE, 0)));
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Transl(0, -STEP_MOVE, 0)));
+                        break;
+                    case KeyEvent.VK_K:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Transl(0, 0, STEP_MOVE)));
+                        break;
+                    case KeyEvent.VK_L:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4Transl(0, 0, -STEP_MOVE)));
+                        break;
+                    case KeyEvent.VK_NUMPAD4:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4RotX(-STEP_ROTATION)));
+                        break;
+                    case KeyEvent.VK_NUMPAD6:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4RotX(STEP_ROTATION)));
+                        break;
+                    case KeyEvent.VK_NUMPAD8:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4RotY(STEP_ROTATION)));
+                        break;
+                    case KeyEvent.VK_NUMPAD2:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4RotY(-STEP_ROTATION)));
+                        break;
+                    case KeyEvent.VK_NUMPAD7:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4RotZ(STEP_ROTATION)));
+                        break;
+                    case KeyEvent.VK_NUMPAD1:
+                        matMultiply = new Mat4(matMultiply.mul(new Mat4RotZ(-STEP_ROTATION)));
+                        break;
                 }
                 draw();
                 panel.repaint();
@@ -163,7 +215,7 @@ public class Canvas {
                 final double y2 =
                         -(2 * (endR + 0.5) / image.getHeight() - 1);
 
-                camera = rotateCam(camera, new Vec2D(x2-x1, y2-y1));
+                camera = rotateCam(camera, new Vec2D(x2 - x1, y2 - y1));
                 draw();
                 panel.repaint();
 
@@ -175,6 +227,10 @@ public class Canvas {
         frame.add(panel, BorderLayout.CENTER);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Canvas(800, 600)::start);
     }
 
     private Camera rotateCam(Camera cam, Vec2D vec) {
@@ -195,10 +251,14 @@ public class Canvas {
         presenter.present(image, graphics);
 
         graphics.setColor(Color.WHITE);
-        graphics.drawString("Pohyb pomoci A,W,S,D", 5, 30);
-        graphics.drawString("Rotace kamery levym tlacitkem mysi ", 5, 45);
-        graphics.drawString("Zmena perspektivy P", 5, 60);
+        graphics.drawString("Move A,W,S,D, move solids using arrows", 5, 30);
+        graphics.drawString("Rotate camera using left button ", 5, 45);
+        graphics.drawString("Change of perspective P", 5, 60);
+        graphics.drawString("Scale change: M,N", 5, 75);
+        graphics.drawString("Rotate objects using numpad: 4,6,8,2,7,1", 5, 90);
+
     }
+
     private void help() {
 
     }
@@ -206,26 +266,29 @@ public class Canvas {
     private void draw() {
         clear();
 
-
-        for (int i = 0; i < solidBuffer.size(); i++) {
+        for (int i = 0; i < 3; i++) {
             image =
                     new WireframeRenderer<>(lineRenderer)
                             .render(image, solidBuffer.get(i),
-                                   camera.getViewMatrix()
-//                                        .mul(new Mat4OrthoRH(image.getWidth()/100,image.getHeight()/100,0.1,1000)),
+                                    camera.getViewMatrix()
                                           .mul(matView),
                                     colorBuffer.get(i));
-            help();
+        }
+
+
+        for (int i = 3; i < solidBuffer.size(); i++) {
+            image =
+                    new WireframeRenderer<>(lineRenderer)
+                            .render(image, solidBuffer.get(i),
+                                    camera.getViewMatrix()
+                                          .mul(matMultiply),
+                                    colorBuffer.get(i));
         }
     }
 
     private void start() {
         draw();
         panel.repaint();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Canvas(800, 600)::start);
     }
 
 }
