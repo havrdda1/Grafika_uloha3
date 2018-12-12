@@ -11,37 +11,36 @@ import transforms.Mat4;
 import transforms.Point3D;
 
 public class PolygonMesh implements Solid<Point3D, Topology> {
-    final @NotNull IndexedSeq<Point3D> vertices;
-    final @NotNull IndexedSeq<Integer> indices;
-    final Array parts;
+    private final @NotNull IndexedSeq<Point3D> vertices;
+    private final @NotNull IndexedSeq<Integer> indices;
+    private final Array parts;
 
-    private Mat4 curve;
     private Bicubic mesh;
 
-    public static final Point3D p11 = new Point3D(5, -2, 1);
-    public static final Point3D p12 = new Point3D(4, -2, 1);
-    public static final Point3D p13 = new Point3D(3, -2, 1);
-    public static final Point3D p14 = new Point3D(2, -2, 1);
+    private static final Point3D p11 = new Point3D(5, -2, 1);
+    private static final Point3D p12 = new Point3D(4, -2, 1);
+    private static final Point3D p13 = new Point3D(3, -2, 1);
+    private static final Point3D p14 = new Point3D(2, -2, 1);
 
-    public static final Point3D p21 = new Point3D(5, -1, 1);
-    public static final Point3D p22 = new Point3D(4, -1, 2);
-    public static final Point3D p23 = new Point3D(3, -1, 2);
-    public static final Point3D p24 = new Point3D(2, -1, 1);
+    private static final Point3D p21 = new Point3D(5, -1, 1);
+    private static final Point3D p22 = new Point3D(4, -1, 2);
+    private static final Point3D p23 = new Point3D(3, -1, 2);
+    private static final Point3D p24 = new Point3D(2, -1, 1);
 
-    public static final Point3D p31 = new Point3D(5, 0, -1);
-    public static final Point3D p32 = new Point3D(4, 0, -1);
-    public static final Point3D p33 = new Point3D(3, 0, -1);
-    public static final Point3D p34 = new Point3D(2, 0, -1);
+    private static final Point3D p31 = new Point3D(5, 0, -1);
+    private static final Point3D p32 = new Point3D(4, 0, -1);
+    private static final Point3D p33 = new Point3D(3, 0, -1);
+    private static final Point3D p34 = new Point3D(2, 0, -1);
 
-    public static final Point3D p41 = new Point3D(5, 1, 1);
-    public static final Point3D p42 = new Point3D(4, 1, 2);
-    public static final Point3D p43 = new Point3D(3, 1, 2);
-    public static final Point3D p44 = new Point3D(2, 1, 1);
+    private static final Point3D p41 = new Point3D(5, 1, 1);
+    private static final Point3D p42 = new Point3D(4, 1, 2);
+    private static final Point3D p43 = new Point3D(3, 1, 2);
+    private static final Point3D p44 = new Point3D(2, 1, 1);
 
 
     public PolygonMesh(int smoothness) {
 
-        curve = Cubic.BEZIER;
+        Mat4 curve = Cubic.BEZIER;
         mesh = new Bicubic(curve, p11, p12, p13, p14, p21, p22, p23, p24, p31, p32, p33, p34, p41, p42, p43, p44);
 
         vertices = Stream.rangeClosed(0, smoothness).flatMap(
