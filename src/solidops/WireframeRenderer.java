@@ -16,9 +16,6 @@ import java.util.Optional;
 public class WireframeRenderer<P> implements
         SolidRenderer<P, Point3D, Topology> {
     final @NotNull LineRenderer<P> lineRenderer;
-    public Mat4 model, view, projection;
-    public double moveX, moveY, moveZ = 0;
-    public double scale = 1;
 
     public WireframeRenderer(@NotNull LineRenderer<P> liner) {
         this.lineRenderer = liner;
